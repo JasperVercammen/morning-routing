@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-const START_HOUR = 7;
-const START_MINUTES = 0;
-const END_HOURS = 7;
-const END_MINUTES = 55;
-
-export const Progress = ({ onFinished }: { onFinished: () => void }) => {
+export const Progress = ({
+  onFinished,
+  leaveTime = "07:55",
+}: {
+  onFinished: () => void;
+  leaveTime?: string;
+}) => {
   const [progress, setProgress] = useState(0);
   const isFinishedTriggered = useRef(false);
 
@@ -13,9 +14,10 @@ export const Progress = ({ onFinished }: { onFinished: () => void }) => {
     const interval = setInterval(() => {
       const now = new Date();
       const start = new Date();
-      start.setHours(START_HOUR, START_MINUTES, 0, 0);
+      const [endHour, endMinute] = leaveTime.split(":").map(Number);
+      start.setHours(endHour - 1, endMinute, 0, 0);
       const end = new Date();
-      end.setHours(END_HOURS, END_MINUTES, 0, 0);
+      end.setHours(endHour, endMinute, 0, 0);
 
       const total = end.getTime() - start.getTime();
       const elapsed = now.getTime() - start.getTime();
@@ -26,7 +28,7 @@ export const Progress = ({ onFinished }: { onFinished: () => void }) => {
         .padStart(2, "0")}`;
 
       if (
-        hhmm === `${END_HOURS}:${END_MINUTES.toString().padStart(2, "0")}` &&
+        hhmm === `${endHour}:${endMinute.toString().padStart(2, "0")}` &&
         !isFinishedTriggered.current
       ) {
         onFinished();
@@ -40,12 +42,12 @@ export const Progress = ({ onFinished }: { onFinished: () => void }) => {
         const percentage = Math.min((elapsed / total) * 100, 100);
         setProgress(percentage);
       } else {
-        setProgress(100); // Na 07:55 → bar blijft vol
+        setProgress(100); // Na leaveTime → bar blijft vol
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [onFinished]);
+  }, [onFinished, leaveTime]);
 
   return (
     <div className="w-full h-4 bg-white/20 backdrop-blur-md shadow-lg rounded-full mt-8 mb-4">

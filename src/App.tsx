@@ -17,6 +17,7 @@ function App() {
   const confirmTimer = useRef<NodeJS.Timeout | null>(null);
 
   const [tasks, setTasks] = useState<string[]>([]);
+  const [leaveTime, setLeaveTime] = useState<string>("07:55");
 
   // Keep screen on
   useWakeLock(popupAccepted);
@@ -82,8 +83,6 @@ function App() {
     };
   }, []);
 
-  
-
   const onConfirmComplete = () => {
     alarmRef.current?.pause();
     setTimeout(() => {
@@ -95,9 +94,10 @@ function App() {
     <div className="min-h-screen flex flex-col justify-around p-4 bg-gradient-to-b from-blue-100 to-blue-300 text-gray-800">
       {!popupAccepted && (
         <ChooseTasks
-          onSubmit={(tasks: string[]) => {
+          onSubmit={(tasks: string[], time: string) => {
             setPopupAccepted(true);
             setTasks(tasks);
+            setLeaveTime(time);
           }}
         />
       )}
@@ -111,6 +111,7 @@ function App() {
       <WeatherReport />
 
       <Progress
+        leaveTime={leaveTime}
         onFinished={() => {
           fadeInAudio(alarmRef.current!);
           setShowConfirmButtons(true);
@@ -118,13 +119,14 @@ function App() {
       />
 
       <div className="mt-4 flex justify-center absolute bottom-40 left-0 right-0">
-        <Clock />
+        <Clock leaveTime={leaveTime} />
       </div>
-
-      <audio ref={alarmRef} preload="auto" loop>
-        <source src="/alarm.mp3" type="audio/mpeg" />
-        Your browser does not support the audio element.
-      </audio>
+      {!confirmed && (
+        <audio ref={alarmRef} preload="auto" loop>
+          <source src="/alarm.mp3" type="audio/mpeg" />
+          Your browser does not support the audio element.
+        </audio>
+      )}
 
       {showConfirmButtons && (
         <div className="fixed inset-0 flex justify-between items-end px-8 pb-16 z-40">

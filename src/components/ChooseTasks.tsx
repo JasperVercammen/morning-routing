@@ -5,14 +5,19 @@ const availableTasks = ["🧦", "👟", "🧥", "🎒", "🧴", "🧤", "🪖", 
 export const ChooseTasks = ({
   onSubmit,
 }: {
-  onSubmit: (tasks: string[]) => void;
+  onSubmit: (tasks: string[], time: string) => void;
 }) => {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [leaveTime, setLeaveTime] = useState<string>("07:55");
 
   useEffect(() => {
     const stored = localStorage.getItem("selectedTasks");
     if (stored) {
       setSelectedTasks(JSON.parse(stored));
+    }
+    const storedLeaveTime = localStorage.getItem("leaveTime");
+    if (storedLeaveTime) {
+      setLeaveTime(storedLeaveTime);
     }
   }, []);
 
@@ -46,13 +51,30 @@ export const ChooseTasks = ({
           })}
         </div>
 
+        <div className="mb-6">
+          <label
+            htmlFor="leavetime"
+            className="block text-xl font-semibold mb-2"
+          >
+            Vertrektijd?
+          </label>
+          <input
+            id="leavetime"
+            type="time"
+            value={leaveTime}
+            onChange={(e) => setLeaveTime(e.target.value)}
+            className="px-3 py-2 border-none focus:outline-none rounded-md border bg-white/20 backdrop-blur-md shadow-lg"
+          />
+        </div>
+
         <button
           onClick={() => {
             localStorage.setItem(
               "selectedTasks",
               JSON.stringify(selectedTasks)
             );
-            onSubmit(selectedTasks);
+            localStorage.setItem("leaveTime", leaveTime);
+            onSubmit(selectedTasks, leaveTime);
           }}
           className="px-4 py-2 bg-ila text-white rounded-full"
         >
