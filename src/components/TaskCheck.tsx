@@ -30,7 +30,8 @@ export const TaskCheck = ({ tasks }: { tasks: string[] }) => {
         });
       }, i * 500);
     });
-  }, [tasks.length, tasksVisible]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tasks.length]);
 
   const allConfirmed = confirmedW.every(Boolean) && confirmedI.every(Boolean);
   useEffect(() => {
@@ -66,58 +67,89 @@ export const TaskCheck = ({ tasks }: { tasks: string[] }) => {
         animate={{ opacity: allConfirmed ? 0 : 1 }}
         transition={{ duration: 0.5 }}
       >
-        {tasks.map((task, i) => (
-          <div
-            key={task}
-            className={`flex flex-col items-center gap-6 transition-all duration-500 ${
-              tasksVisible[i] ? "opacity-100 scale-100" : "opacity-0 scale-50"
-            }`}
-          >
-            <AnimatePresence>
-              {showButtons && (
-                <motion.button
-                  layout // zorgt voor een smooth transform
-                  onClick={() => toggleConfirmed(i, "W")}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{
-                    opacity: 1,
-                    scale: confirmedW[i] ? 1.2 : 1,
-                    rotate: confirmedW[i] ? 360 : 0,
-                    backgroundColor: confirmedW[i] ? "#22c55e" : "#ec4899", // groen of roze
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="w-14 h-14 rounded-full text-white text-xl font-bold flex items-center justify-center"
-                >
-                  {confirmedW[i] ? "✅" : "W"}
-                </motion.button>
+        {tasks.map((task, i) => {
+          console.log("RERENDER, ", i);
+          return (
+            <div
+              key={task}
+              className={`relative flex flex-col items-center gap-6 transition-all duration-500 ${
+                tasksVisible[i] ? "opacity-100 scale-100" : "opacity-0 scale-50"
+              }`}
+            >
+              <AnimatePresence>
+                {showButtons && (
+                  <>
+                    <motion.button
+                      layout // zorgt voor een smooth transform
+                      onClick={() => toggleConfirmed(i, "W")}
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{
+                        opacity: 1,
+                        scale: confirmedW[i] ? 1.2 : 1,
+                        rotate: confirmedW[i] ? 360 : 0,
+                        backgroundColor: confirmedW[i] ? "#22c55e" : "#ec4899", // groen of roze
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-14 h-14 rounded-full text-white text-xl font-bold flex items-center justify-center"
+                    >
+                      {confirmedW[i] ? "✅" : "W"}
+                    </motion.button>
+                  </>
+                )}
+              </AnimatePresence>
+              {confirmedW[i] && (
+                <div className="absolute -top-4">
+                  <ConfettiExplosion
+                    force={0.4}
+                    duration={2200}
+                    particleCount={100}
+                    width={400}
+                    zIndex={99}
+                  />
+                </div>
               )}
-            </AnimatePresence>
 
-            <div>{task}</div>
+              <div>{task}</div>
 
-            <AnimatePresence>
-              {showButtons && (
-                <motion.button
-                  key={`i-${i}`}
-                  onClick={() => toggleConfirmed(i, "I")}
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{
-                    opacity: 1,
-                    scale: confirmedI[i] ? [1, 1.3, 1] : 1,
-                    y: confirmedI[i] ? [0, -20, 0] : 0,
-                    backgroundColor: confirmedI[i] ? "#22c55e" : "#C148E2",
-                  }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-14 h-14 rounded-full text-white text-xl font-bold flex items-center justify-center"
-                >
-                  {confirmedI[i] ? "✅" : "i"}
-                </motion.button>
+              {confirmedI[i] && (
+                <div className="absolute top-40">
+                  <ConfettiExplosion
+                    force={0.4}
+                    duration={2200}
+                    particleCount={100}
+                    width={400}
+                    zIndex={99}
+                  />
+                </div>
               )}
-            </AnimatePresence>
-          </div>
-        ))}
+              <AnimatePresence>
+                {showButtons && (
+                  <motion.button
+                    key={`i-${i}`}
+                    onClick={() => toggleConfirmed(i, "I")}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{
+                      opacity: 1,
+                      scale: confirmedI[i] ? [1, 1.3, 1] : 1,
+                      y: confirmedI[i] ? [0, -20, 0] : 0,
+                      backgroundColor: confirmedI[i] ? "#22c55e" : "#C148E2",
+                    }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-14 h-14 rounded-full text-white text-xl font-bold flex items-center justify-center"
+                  >
+                    {confirmedI[i] ? "✅" : "i"}
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </motion.div>
       {showConfetti && (
         <div className="fixed top-1/2 left-1/2 pointer-events-none bg-green-500">
